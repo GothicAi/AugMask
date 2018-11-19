@@ -2,7 +2,7 @@ import scipy.ndimage as ndimage
 import numpy as np
 from PIL import Image
 import pycocotools.mask as cocomask
-from pycococreater import binary_mask_to_rle
+from .pycococreater import binary_mask_to_rle
 
 
 def __bbox_from_bboxes(bboxes: list):
