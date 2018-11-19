@@ -5,7 +5,7 @@ import numpy as np
 import cv2
 import pycocotools.mask as cocomask
 import opencv_mat as gm
-from single_image_process import get_transform, get_restriction
+from .single_image_process import get_transform, get_restriction
 
 
 def __cocoseg_to_binary(seg, height, width):
