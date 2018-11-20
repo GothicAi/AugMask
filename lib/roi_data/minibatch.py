@@ -60,25 +60,31 @@ def _get_image_blob(roidb, coco):
             'Failed to read image \'{}\''.format(roidb[i]['image'])
                     
         # AUG BEGIN--------------------------------
-        from AugSeg.get_instance_group import extract
-        from AugSeg.affine_transform import transform_image, transform_annotation
-        img_id = roidb[i]['id']
-        ann_ids = coco.getAnnIds(imgIds=img_id)
-        anns = coco.loadAnns(ann_ids)
-        background, instances_list, transforms_list, groupbnds_list, groupidx_list = extract(anns, im)
-        new_img = transform_image(background, instances_list, transforms_list)
-        new_ann = transform_annotation(anns, transforms_list, groupbnds_list, groupidx_list,
-                                       background.shape[1], background.shape[0])
-        im = new_img
-        from datasetsAug.roidb import combined_roidb_for_training
-        new_roidb, ratio_list, ratio_index = combined_roidb_for_training( \
-            ('coco_2017_train',), cfg.TRAIN.PROPOSAL_FILES, \
-            img_id, new_ann, coco
-            )
-        if roidb[i]['flipped']:
-            roidb[i] = new_roidb[1]
-        else:
-            roidb[i] = new_roidb[0]
+        backupim = im
+        backuproidb = roidb[i]
+        try:    
+            from AugSeg.get_instance_group import extract
+            from AugSeg.affine_transform import transform_image, transform_annotation
+            img_id = roidb[i]['id']
+            ann_ids = coco.getAnnIds(imgIds=img_id)
+            anns = coco.loadAnns(ann_ids)
+            background, instances_list, transforms_list, groupbnds_list, groupidx_list = extract(anns, im)
+            new_img = transform_image(background, instances_list, transforms_list)
+            new_ann = transform_annotation(anns, transforms_list, groupbnds_list, groupidx_list,
+                                           background.shape[1], background.shape[0])
+            im = new_img
+            from datasetsAug.roidb import combined_roidb_for_training
+            new_roidb, ratio_list, ratio_index = combined_roidb_for_training( \
+                ('coco_2017_train',), cfg.TRAIN.PROPOSAL_FILES, \
+                img_id, new_ann, coco
+                )
+            if roidb[i]['flipped']:
+                roidb[i] = new_roidb[1]
+            else:
+                roidb[i] = new_roidb[0]
+        except:
+            roidb[i] = backuproidb
+            im = backupim
         # AUG END----------------------------------
         
         # If NOT using opencv to read in images, uncomment following lines

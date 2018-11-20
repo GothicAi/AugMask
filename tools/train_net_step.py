@@ -243,7 +243,7 @@ def main():
     )
     # ADD-------------------
     from pycocotools.coco import COCO
-    coco = COCO('/data/jianhua/mask_rcnn_baseline_9w+18w/data/coco/annotations/instances_train2017.json')
+    coco = COCO('data/coco/annotations/instances_train2017.json')
     dataset = RoiDataLoader(
         roidb,
         cfg.MODEL.NUM_CLASSES,
@@ -414,12 +414,19 @@ def main():
 
             training_stats.IterTic()
             optimizer.zero_grad()
+            ERRORCNT = 0
             for inner_iter in range(args.iter_size):
                 try:
                     input_data = next(dataiterator)
                 except StopIteration:
                     dataiterator = iter(dataloader)
                     input_data = next(dataiterator)
+                except TypeError:
+                    dataiterator = iter(dataloader)
+                    input_data = next(dataiterator)
+                    ERRORCNT = ERRORCNT + 1
+                    with open("ERROR.txt","w") as f:
+                        f.write(str(ERRORCNT))
 
                 for key in input_data:
                     if key != 'roidb': # roidb is a list of ndarrays with inconsistent length
